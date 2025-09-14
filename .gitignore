@@ -1,0 +1,20 @@
+
+# Rust
+turngpt-rust/target/
+
+# Python
+**/.venv/
+**/*.pyc
+**/__pycache__/
+
+# Jupyter Notebook
+*.ipynb
+
+# OS generated files
+.DS_Store
+
+# IDE files
+.idea/
+
+# Markdown files
+*.md

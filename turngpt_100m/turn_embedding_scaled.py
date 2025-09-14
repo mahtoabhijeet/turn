@@ -7,6 +7,7 @@ import torch.nn as nn
 import numpy as np
 from typing import Dict, List, Tuple, Optional
 import math
+import turngpt_rust # Import the Rust module
 
 class ScaledTurnEmbedding(nn.Module):
     """
@@ -64,17 +65,25 @@ class ScaledTurnEmbedding(nn.Module):
         # Get turn vectors for input tokens
         base_turns = self.turns[input_ids]  # [batch_size, seq_len, n_turns]
         
-        # Generate embeddings via polynomial transformation
-        embeddings = torch.zeros(batch_size, seq_len, self.output_dim, device=base_turns.device)
+        # Generate embeddings via polynomial transformation using Rust
+        # Convert PyTorch tensors to NumPy arrays for Rust FFI
+        turns_np = base_turns.detach().cpu().numpy().astype(np.int8)
         
-        for turn_idx in range(self.n_turns):
-            x = base_turns[..., turn_idx].unsqueeze(-1)  # [batch_size, seq_len, 1]
-            
-            # Generate polynomial powers: 1, x, x², x³, x⁴
-            powers = torch.cat([x**d for d in range(self.poly_degree + 1)], dim=-1)
-            
-            # Apply polynomial coefficients
-            embeddings += torch.einsum('bsp,po->bso', powers, self.poly_coeffs[turn_idx])
+        # Prepare coefficients for Rust function
+        # Reshape poly_coeffs from (n_turns, poly_degree + 1, output_dim) to a flat array
+        # The Rust function expects coeffs to be flattened for each turn_idx
+        coeffs_np = self.poly_coeffs.detach().cpu().numpy().astype(np.float32)
+        
+        # Call Rust function for polynomial evaluation
+        # The Rust function will return a flattened 1D array, reshape it back to 3D
+        rust_embeddings_flat = turngpt_rust.evaluate_turns(
+            turns_np.reshape(-1, self.n_turns), # Reshape turns to (batch_size * seq_len, n_turns)
+            coeffs_np.reshape(self.n_turns, -1) # Reshape coeffs to (n_turns, (poly_degree + 1) * output_dim)
+        )
+        
+        embeddings = torch.from_numpy(
+            np.array(rust_embeddings_flat, dtype=np.float32)
+        ).reshape(batch_size, seq_len, self.output_dim).to(base_turns.device)
         
         # Add position embeddings
         position_embeds = self.position_embeddings(position_ids)
@@ -104,11 +113,21 @@ class ScaledTurnEmbedding(nn.Module):
         turn_b = self.turns[word_b_id]
         turn_c = self.turns[word_c_id]
         
-        result_turns = turn_a - turn_b + turn_c
+        # Perform semantic arithmetic using Rust
+        result_turns_np = np.array(turngpt_rust.semantic_arithmetic(
+            turn_a.detach().cpu().numpy().astype(np.int8),
+            turn_b.detach().cpu().numpy().astype(np.int8),
+            turn_c.detach().cpu().numpy().astype(np.int8)
+        ), dtype=np.int8)
         
-        # Find closest token by turn distance
-        distances = torch.norm(self.turns - result_turns.unsqueeze(0), dim=1)
-        closest_id = torch.argmin(distances).item()
+        result_turns = torch.from_numpy(result_turns_np).to(turn_a.device)
+        
+        # Find closest token by turn distance using Rust
+        vocab_turns_np = self.turns.detach().cpu().numpy().astype(np.int8)
+        closest_id = turngpt_rust.find_closest_turn(
+            result_turns_np,
+            vocab_turns_np
+        )
         
         return result_turns.detach(), closest_id
     
