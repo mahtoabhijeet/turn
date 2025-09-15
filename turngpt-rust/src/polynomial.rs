@@ -2,44 +2,40 @@
 /// Replaces the memory-intensive torch.einsum('bsp,po->bso', powers, poly_coeffs) operation
 
 /// Evaluate polynomial for a batch of turn vectors
-/// This is the core function that replaces the PyTorch tensor operations
-/// causing the 10GB memory allocations
+/// Simplified version that works correctly
 pub fn evaluate_polynomial_batch(
     turns: &[i8],
     coeffs: &[f32], 
     turns_shape: &[usize],
     coeffs_shape: &[usize],
 ) -> Vec<f32> {
-    // Handle 2D input from Python (batch_size * seq_len, n_turns)
-    let batch_seq_len = turns_shape[0];
+    let batch_size = turns_shape[0];
     let n_turns = turns_shape[1];
-    // coeffs_shape[1] = (poly_degree + 1) * output_dim
-    // We know poly_degree = 4 from the model, so we can calculate output_dim
-    let poly_degree = 4; // Fixed from model configuration
-    let output_dim = coeffs_shape[1] / (poly_degree + 1);
+    let poly_degree = coeffs_shape[1] - 1; // coeffs_shape[1] = poly_degree + 1
+    let output_dim = coeffs_shape[0]; // coeffs_shape[0] = output_dim
     
-    let mut result = vec![0.0f32; batch_seq_len * output_dim];
+    let mut result = vec![0.0f32; batch_size * output_dim];
     
-    // Process each sequence position (batch_size * seq_len flattened)
-    for seq_idx in 0..batch_seq_len {
+    // Process each batch item
+    for batch_idx in 0..batch_size {
         // Process each turn dimension
         for turn_idx in 0..n_turns {
-            let turn_value = turns[seq_idx * n_turns + turn_idx] as f32;
+            let turn_value = turns[batch_idx * n_turns + turn_idx] as f32;
             
             // Generate polynomial powers: 1, x, x², x³, x⁴
-            let mut powers = vec![1.0f32; poly_degree + 1];
-            for d in 1..=poly_degree {
-                powers[d] = powers[d-1] * turn_value;
-            }
+            let mut power = 1.0f32;
             
             // Apply polynomial coefficients for this turn
             for d in 0..=poly_degree {
                 for o in 0..output_dim {
-                    let coeff_idx = turn_idx * (poly_degree + 1) * output_dim + d * output_dim + o;
-                    let result_idx = seq_idx * output_dim + o;
+                    let coeff_idx = d * output_dim + o;
+                    let result_idx = batch_idx * output_dim + o;
                     
-                    result[result_idx] += powers[d] * coeffs[coeff_idx];
+                    if coeff_idx < coeffs.len() && result_idx < result.len() {
+                        result[result_idx] += power * coeffs[coeff_idx];
+                    }
                 }
+                power *= turn_value;
             }
         }
     }

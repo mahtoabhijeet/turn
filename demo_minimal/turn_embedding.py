@@ -112,19 +112,37 @@ class SemanticCalculator:
         }
 
 def create_semantic_vocab() -> Dict[str, int]:
-    """Create a small but powerful vocabulary for demonstration"""
+    """Create a comprehensive 100-word vocabulary for strong proof of concept"""
     words = [
-        # Core demo words
-        "king", "queen", "man", "woman",
-        "cat", "dog", "kitten", "lion", 
-        "small", "big", "tiny", "huge",
-        "hot", "cold", "warm", "cool",
-        "red", "blue", "green", "yellow",
-        "run", "ran", "walk", "walked",
-        "good", "bad", "better", "worse",
-        "happy", "sad", "joy", "anger",
-        "love", "hate", "like", "dislike",
-        "strong", "weak", "fast", "slow"
+        # Royalty & Authority (8 words)
+        "king", "queen", "prince", "princess", "emperor", "empress", "ruler", "leader",
+        
+        # People & Relationships (12 words)
+        "man", "woman", "boy", "girl", "child", "adult", "friend", "enemy", "family", "parent", "teacher", "student",
+        
+        # Animals (12 words)
+        "cat", "dog", "kitten", "puppy", "lion", "tiger", "bird", "fish", "horse", "cow", "pig", "sheep",
+        
+        # Size & Scale (8 words)
+        "small", "big", "tiny", "huge", "large", "mini", "giant", "massive",
+        
+        # Temperature & Weather (8 words)
+        "hot", "cold", "warm", "cool", "freezing", "boiling", "sunny", "rainy",
+        
+        # Colors (8 words)
+        "red", "blue", "green", "yellow", "black", "white", "purple", "orange",
+        
+        # Actions & Movement (12 words)
+        "run", "ran", "walk", "walked", "jump", "flew", "swim", "drove", "climb", "fall", "sit", "stand",
+        
+        # Emotions & Feelings (12 words)
+        "happy", "sad", "joy", "anger", "love", "hate", "fear", "calm", "excited", "worried", "proud", "ashamed",
+        
+        # Qualities & States (12 words)
+        "good", "bad", "better", "worse", "strong", "weak", "fast", "slow", "smart", "dumb", "beautiful", "ugly",
+        
+        # Objects & Things (8 words)
+        "house", "car", "book", "food", "water", "tree", "mountain", "ocean"
     ]
     return {word: i for i, word in enumerate(words)}
 
@@ -132,43 +150,125 @@ def initialize_semantic_turns(model: TurnEmbedding, vocab: Dict[str, int]):
     """Initialize turns with semantic structure - the secret sauce"""
     # Format: [Conceptual, Behavioral, Size, Context]
     semantic_init = {
-        # Royalty
-        "king": [5.0, 0.0, 2.0, 0.0],
-        "queen": [5.0, 0.0, 2.0, 0.0],
+        # Royalty & Authority (8 words)
+        "king": [5.0, 0.0, 2.0, 0.0],      # Royal, Neutral, Large, Present
+        "queen": [5.0, 0.0, 2.0, 0.0],     # Royal, Neutral, Large, Present
+        "prince": [5.0, 0.0, 1.0, 0.0],    # Royal, Neutral, Medium, Present
+        "princess": [5.0, 0.0, 1.0, 0.0],  # Royal, Neutral, Medium, Present
+        "emperor": [6.0, 0.0, 3.0, 0.0],   # Imperial, Neutral, Very Large, Present
+        "empress": [6.0, 0.0, 3.0, 0.0],   # Imperial, Neutral, Very Large, Present
+        "ruler": [4.0, 0.0, 2.0, 0.0],     # Authority, Neutral, Large, Present
+        "leader": [4.0, 2.0, 1.0, 0.0],    # Authority, Social, Medium, Present
         
-        # Humans
-        "man": [2.0, 0.0, 0.0, 0.0],
-        "woman": [2.0, 0.0, 0.0, 0.0],
+        # People & Relationships (12 words)
+        "man": [2.0, 0.0, 0.0, 0.0],       # Human, Neutral, Medium, Present
+        "woman": [2.0, 0.0, 0.0, 0.0],     # Human, Neutral, Medium, Present
+        "boy": [2.0, 0.0, -1.0, 0.0],      # Human, Neutral, Small, Present
+        "girl": [2.0, 0.0, -1.0, 0.0],     # Human, Neutral, Small, Present
+        "child": [2.0, 0.0, -2.0, 0.0],    # Human, Neutral, Very Small, Present
+        "adult": [2.0, 0.0, 1.0, 0.0],     # Human, Neutral, Large, Present
+        "friend": [2.0, 3.0, 0.0, 0.0],    # Human, Very Social, Medium, Present
+        "enemy": [2.0, -3.0, 0.0, 0.0],    # Human, Anti-Social, Medium, Present
+        "family": [2.0, 2.0, 0.0, 0.0],    # Human, Social, Medium, Present
+        "parent": [2.0, 1.0, 1.0, 0.0],    # Human, Social, Large, Present
+        "teacher": [2.0, 2.0, 0.0, 0.0],   # Human, Social, Medium, Present
+        "student": [2.0, 0.0, -1.0, 0.0],  # Human, Neutral, Small, Present
         
-        # Animals
-        "cat": [3.0, -2.0, 0.0, 0.0],  # independent
-        "dog": [3.0, 2.0, 0.0, 0.0],   # social
-        "kitten": [3.0, -2.0, -2.0, 0.0],  # small cat
-        "lion": [3.0, -2.0, 3.0, 0.0],     # big cat
+        # Animals (12 words)
+        "cat": [3.0, -2.0, 0.0, 0.0],      # Animal, Independent, Medium, Present
+        "dog": [3.0, 2.0, 0.0, 0.0],       # Animal, Social, Medium, Present
+        "kitten": [3.0, -2.0, -2.0, 0.0],  # Animal, Independent, Small, Present
+        "puppy": [3.0, 2.0, -2.0, 0.0],    # Animal, Social, Small, Present
+        "lion": [3.0, -2.0, 3.0, 0.0],     # Animal, Independent, Large, Present
+        "tiger": [3.0, -2.0, 2.0, 0.0],    # Animal, Independent, Large, Present
+        "bird": [3.0, 0.0, -1.0, 1.0],     # Animal, Neutral, Small, Air
+        "fish": [3.0, 0.0, 0.0, -1.0],     # Animal, Neutral, Medium, Water
+        "horse": [3.0, 1.0, 2.0, 0.0],     # Animal, Social, Large, Present
+        "cow": [3.0, 0.0, 2.0, 0.0],       # Animal, Neutral, Large, Present
+        "pig": [3.0, 0.0, 1.0, 0.0],       # Animal, Neutral, Medium, Present
+        "sheep": [3.0, 1.0, 1.0, 0.0],     # Animal, Social, Medium, Present
         
-        # Size modifiers
-        "small": [0.0, 0.0, -2.0, 0.0],
-        "big": [0.0, 0.0, 2.0, 0.0],
-        "tiny": [0.0, 0.0, -3.0, 0.0],
-        "huge": [0.0, 0.0, 3.0, 0.0],
+        # Size & Scale (8 words)
+        "small": [0.0, 0.0, -2.0, 0.0],    # Modifier, Neutral, Small, Present
+        "big": [0.0, 0.0, 2.0, 0.0],       # Modifier, Neutral, Large, Present
+        "tiny": [0.0, 0.0, -3.0, 0.0],     # Modifier, Neutral, Very Small, Present
+        "huge": [0.0, 0.0, 3.0, 0.0],      # Modifier, Neutral, Very Large, Present
+        "large": [0.0, 0.0, 2.0, 0.0],     # Modifier, Neutral, Large, Present
+        "mini": [0.0, 0.0, -3.0, 0.0],     # Modifier, Neutral, Very Small, Present
+        "giant": [0.0, 0.0, 4.0, 0.0],     # Modifier, Neutral, Huge, Present
+        "massive": [0.0, 0.0, 4.0, 0.0],   # Modifier, Neutral, Huge, Present
         
-        # Temperature
-        "hot": [0.0, 0.0, 0.0, 3.0],
-        "cold": [0.0, 0.0, 0.0, -3.0],
-        "warm": [0.0, 0.0, 0.0, 1.0],
-        "cool": [0.0, 0.0, 0.0, -1.0],
+        # Temperature & Weather (8 words)
+        "hot": [0.0, 0.0, 0.0, 3.0],       # Modifier, Neutral, Medium, Hot
+        "cold": [0.0, 0.0, 0.0, -3.0],     # Modifier, Neutral, Medium, Cold
+        "warm": [0.0, 0.0, 0.0, 1.0],      # Modifier, Neutral, Medium, Warm
+        "cool": [0.0, 0.0, 0.0, -1.0],     # Modifier, Neutral, Medium, Cool
+        "freezing": [0.0, 0.0, 0.0, -4.0], # Modifier, Neutral, Medium, Very Cold
+        "boiling": [0.0, 0.0, 0.0, 4.0],   # Modifier, Neutral, Medium, Very Hot
+        "sunny": [0.0, 0.0, 0.0, 2.0],     # Modifier, Neutral, Medium, Bright
+        "rainy": [0.0, 0.0, 0.0, -2.0],    # Modifier, Neutral, Medium, Wet
         
-        # Actions
-        "run": [1.0, 0.0, 0.0, 1.0],   # present
-        "ran": [1.0, 0.0, 0.0, -1.0],  # past
-        "walk": [1.0, 0.0, 0.0, 1.0],
-        "walked": [1.0, 0.0, 0.0, -1.0],
+        # Colors (8 words)
+        "red": [0.0, 0.0, 0.0, 0.0],       # Color, Neutral, Medium, Present
+        "blue": [0.0, 0.0, 0.0, 0.0],      # Color, Neutral, Medium, Present
+        "green": [0.0, 0.0, 0.0, 0.0],     # Color, Neutral, Medium, Present
+        "yellow": [0.0, 0.0, 0.0, 0.0],    # Color, Neutral, Medium, Present
+        "black": [0.0, 0.0, 0.0, 0.0],     # Color, Neutral, Medium, Present
+        "white": [0.0, 0.0, 0.0, 0.0],     # Color, Neutral, Medium, Present
+        "purple": [0.0, 0.0, 0.0, 0.0],    # Color, Neutral, Medium, Present
+        "orange": [0.0, 0.0, 0.0, 0.0],    # Color, Neutral, Medium, Present
         
-        # Emotions
-        "happy": [0.0, 3.0, 0.0, 0.0],
-        "sad": [0.0, -3.0, 0.0, 0.0],
-        "joy": [0.0, 4.0, 0.0, 0.0],
-        "anger": [0.0, -4.0, 0.0, 0.0],
+        # Actions & Movement (12 words)
+        "run": [1.0, 0.0, 0.0, 1.0],       # Action, Neutral, Medium, Present
+        "ran": [1.0, 0.0, 0.0, -1.0],      # Action, Neutral, Medium, Past
+        "walk": [1.0, 0.0, 0.0, 1.0],      # Action, Neutral, Medium, Present
+        "walked": [1.0, 0.0, 0.0, -1.0],   # Action, Neutral, Medium, Past
+        "jump": [1.0, 0.0, 0.0, 1.0],      # Action, Neutral, Medium, Present
+        "flew": [1.0, 0.0, 0.0, -1.0],     # Action, Neutral, Medium, Past
+        "swim": [1.0, 0.0, 0.0, 1.0],      # Action, Neutral, Medium, Present
+        "drove": [1.0, 0.0, 0.0, -1.0],    # Action, Neutral, Medium, Past
+        "climb": [1.0, 0.0, 0.0, 1.0],     # Action, Neutral, Medium, Present
+        "fall": [1.0, 0.0, 0.0, 1.0],      # Action, Neutral, Medium, Present
+        "sit": [1.0, 0.0, 0.0, 1.0],       # Action, Neutral, Medium, Present
+        "stand": [1.0, 0.0, 0.0, 1.0],     # Action, Neutral, Medium, Present
+        
+        # Emotions & Feelings (12 words)
+        "happy": [0.0, 3.0, 0.0, 0.0],     # Emotion, Positive, Medium, Present
+        "sad": [0.0, -3.0, 0.0, 0.0],      # Emotion, Negative, Medium, Present
+        "joy": [0.0, 4.0, 0.0, 0.0],       # Emotion, Very Positive, Medium, Present
+        "anger": [0.0, -4.0, 0.0, 0.0],    # Emotion, Very Negative, Medium, Present
+        "love": [0.0, 4.0, 0.0, 0.0],      # Emotion, Very Positive, Medium, Present
+        "hate": [0.0, -4.0, 0.0, 0.0],     # Emotion, Very Negative, Medium, Present
+        "fear": [0.0, -2.0, 0.0, 0.0],     # Emotion, Negative, Medium, Present
+        "calm": [0.0, 0.0, 0.0, 0.0],      # Emotion, Neutral, Medium, Present
+        "excited": [0.0, 3.0, 0.0, 0.0],   # Emotion, Positive, Medium, Present
+        "worried": [0.0, -2.0, 0.0, 0.0],  # Emotion, Negative, Medium, Present
+        "proud": [0.0, 2.0, 0.0, 0.0],     # Emotion, Positive, Medium, Present
+        "ashamed": [0.0, -3.0, 0.0, 0.0],  # Emotion, Negative, Medium, Present
+        
+        # Qualities & States (12 words)
+        "good": [0.0, 2.0, 0.0, 0.0],      # Quality, Positive, Medium, Present
+        "bad": [0.0, -2.0, 0.0, 0.0],      # Quality, Negative, Medium, Present
+        "better": [0.0, 2.0, 0.0, 0.0],    # Quality, Positive, Medium, Present
+        "worse": [0.0, -2.0, 0.0, 0.0],    # Quality, Negative, Medium, Present
+        "strong": [0.0, 0.0, 2.0, 0.0],    # Quality, Neutral, Large, Present
+        "weak": [0.0, 0.0, -2.0, 0.0],     # Quality, Neutral, Small, Present
+        "fast": [0.0, 0.0, 0.0, 2.0],      # Quality, Neutral, Medium, Fast
+        "slow": [0.0, 0.0, 0.0, -2.0],     # Quality, Neutral, Medium, Slow
+        "smart": [0.0, 1.0, 0.0, 0.0],     # Quality, Positive, Medium, Present
+        "dumb": [0.0, -1.0, 0.0, 0.0],     # Quality, Negative, Medium, Present
+        "beautiful": [0.0, 2.0, 0.0, 0.0], # Quality, Positive, Medium, Present
+        "ugly": [0.0, -2.0, 0.0, 0.0],     # Quality, Negative, Medium, Present
+        
+        # Objects & Things (8 words)
+        "house": [4.0, 0.0, 2.0, 0.0],     # Object, Neutral, Large, Present
+        "car": [4.0, 0.0, 1.0, 0.0],       # Object, Neutral, Medium, Present
+        "book": [4.0, 0.0, 0.0, 0.0],      # Object, Neutral, Medium, Present
+        "food": [4.0, 0.0, 0.0, 0.0],      # Object, Neutral, Medium, Present
+        "water": [4.0, 0.0, 0.0, -1.0],    # Object, Neutral, Medium, Liquid
+        "tree": [4.0, 0.0, 2.0, 0.0],      # Object, Neutral, Large, Present
+        "mountain": [4.0, 0.0, 4.0, 0.0],  # Object, Neutral, Huge, Present
+        "ocean": [4.0, 0.0, 4.0, -1.0],    # Object, Neutral, Huge, Liquid
     }
     
     # Initialize with semantic structure
